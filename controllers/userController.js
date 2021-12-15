@@ -6,6 +6,7 @@ const dbConnection = require("../utils/dbConnection");
 exports.homePage = async (req, res, next) => {
     const [row] = await dbConnection.execute("SELECT * FROM `users` WHERE `id`=?", [req.session.userID]);
 
+
     if (row.length !== 1) {
         return res.redirect('/logout');
     }
@@ -86,25 +87,19 @@ exports.login = async (req, res, next) => {
     try {
 
         const [row] = await dbConnection.execute('SELECT * FROM `users` WHERE `email`=?', [body._email]);
-
         if (row.length != 1) {
             return res.render('login', {
                 error: 'Invalid email address.'
             });
         }
-
         const checkPass = await bcrypt.compare(body._password, row[0].password);
-
         if (checkPass === true) {
             req.session.userID = row[0].id;
             return res.redirect('/');
         }
-
         res.render('login', {
             error: 'Invalid Password.'
         });
-
-
     }
     catch (e) {
         next(e);
